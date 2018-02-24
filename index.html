@@ -7,8 +7,81 @@
         <link href='https:://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css">
         <link href='coffee.css' rel='stylesheet' type='text/css'>
+		
+<style>
+/*body {font-family: Arial, Helvetica, sans-serif;}*/
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    /*padding-top: 100px;*/ /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    /*padding: 20px;*/
+    border: 1px solid #888;
+    /*width: 80%;*/
+	height: 100%; /* Full height */
+}
+
+/* The Close Button */
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+</style>		
+		
+		
 </head>
 <body>
+
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div id="model_detail", class="modal-content">
+    <span class="close">&times;</span>
+
+	<!--
+	<div id="result_panel" class="center">
+	</div>
+
+	<div id="info_panel" class="left_panel">
+		Loading contextual information...
+	</div>
+	<div id="geom_panel" class="right_panel">
+		Loading geometric information...
+	</div>	
+	-->
+	
+	
+  </div>
+
+</div>
+
+
 <div id="result_panel" class="result_contents">
 	Loading results...
 </div>
@@ -36,6 +109,31 @@
 
 
 <script>
+	// Get the modal
+	var modal = document.getElementById('myModal');
+	
+	var modeldetail = $("#model_detail");
+	var dp0=0, dp1=0, dp2=0;
+
+	// Get the <span> element that closes the modal
+	var span = document.getElementsByClassName("close")[0];	
+	
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function() {
+		modal.style.display = "none";
+	}
+
+	function show_model_detail(file_id) {
+		console.log(modeldetail);
+		modeldetail.append(file_id);
+		// When the user clicks the button, open the modal 
+		// btn.onclick = function() {
+			modal.style.display = "block";
+		// }
+
+
+	}
+
 
 	function get_thing_link(thing_id) {
 		return "http://www.thingiverse.com/thing:" + thing_id;
@@ -49,20 +147,153 @@
 	function get_rendering(file_id) {
 		return "https://storage.googleapis.com/thingi10k/renderings/" + file_id + ".png"
 	}
+	
+	
+	function get_author_link(author_name) {
+		return "http://www.thingiverse.com/" + author_name;
+	}
 
+	function add_row(key, val) {
+		return "<tr><td class=\"align_right\"> " + key + " </td><td class=\"align_center\">:</td><td class=\"align_left\">" + val+ "</td></tr>";
+	}
+
+	function add_condition_row(key, condition) {
+		var val = "False";
+		if (condition) {
+			val = "True";
+		}
+		return add_row(key, val);
+	}
+
+	function add_header(name) {
+		return "<tr><td colspan=3 class=\"align_center\"><b>" + name +
+			"</b></td></tr>";
+	}
+
+	function chain_tags(tags) {
+		var num_tags = tags.length;
+		var tag_str = "";
+		for (var i=0; i<num_tags; i++) {
+			tag_str += "<a href=\"results.html?q=tag%3D" + tags[i] + "\">" +
+			"<div class=\"tag\">" + tags[i] + "</div></a>";
+		}
+		return tag_str;
+	}	
+	
+	//---------------------------------------------
+	function retrieve_details_dialog(file_id) {
+		// modeldetail.remove('#result_panel');
+		// modeldetail.remove('#info_panel');
+		// modeldetail.remove('#geom_panel');
+		if (dp0)
+			dp0.remove();
+		if (dp1)
+			dp1.remove();
+		if (dp2)
+			dp2.remove();
+		// var result_panel_ele = 
+		// $("#result_panel").html("<img src=\"" + get_rendering(file_id) + "\"/>");
+		var dialog_content = "<div id=\"result_panel\" class=\"center\">"
+		+ "<img src=\"" + get_rendering(file_id) + "\"/>"
+        + "</div>";
+		
+		dp0 = $(dialog_content);
+		modeldetail.append( dp0 );
+		
+		var baseurllink = "https://ten-thousand-models.appspot.com";///api/v1/model/100028
+		$.getJSON(baseurllink + get_api_uri() + "/model/" + file_id,
+		function(data) {
+			var contents = "<p><table>"
+			//contents += add_header("Contextual info");
+			contents += add_row("Title", data["title"]);
+			contents += add_row("Author", "<a href=\"" +
+			get_author_link(data["author"]) + "\">" + data["author"] + "</a>");
+			contents += add_row("License", data["license"]);
+			contents += add_row("Date", data["publish_time"]);
+			contents += add_row("Category", data["category"]);
+			contents += add_row("Subcategory", data["subcategory"]);
+			contents += add_row("Tags", chain_tags(data["tags"]));
+			contents += add_row("Thing ID", data["thing_id"] +
+				" (<a href=\"" + get_thing_link(data["thing_id"]) + "\">" +
+				"Thingiverse" + "</a>)"
+			);
+			contents += add_row("File ID", file_id +
+				" (<a href=\"" + data["link"] + "\">" +
+				"Download" + "</a>)"
+			);
+			contents += "</table></p>";
+			// $("#info_panel").html(contents);
+			var info_panel_content = "<div id=\"info_panel\" class=\"left_panel\">"
+			+ contents
+			+ "</div>";
+			dp1 = $(info_panel_content);
+			modeldetail.append( dp1 );
+
+			contents = "<p><table>";
+			//contents += add_header("Geometry info");
+			contents += add_row("#Vertices", data["num_vertices"]);
+			contents += add_row("#Faces", data["num_faces"]);
+			contents += add_row("#Components", data["num_connected_components"]);
+			var euler = data["euler_characteristic"];
+			contents += add_row("Euler", euler);
+			if (euler % 2 == 0 && data["num_connected_components"] == 1
+			&& data["vertex_manifold"]==1) {
+				contents += add_row("Genus", (2-euler)/2);
+			}
+
+			contents += add_condition_row("Closed", data["num_boundary_edges"]==0);
+			contents += add_condition_row("Oriented", data["orientable"]==1);
+			contents += add_condition_row("Self-intersecting", data["num_self_intersections"]>0);
+			contents += add_condition_row("Vertex manifold", data["vertex_manifold"]==1);
+			contents += add_condition_row("Edge manifold", data["edge_manifold"]==1);
+			contents += add_condition_row("Combinatorially degenerate",
+			data["num_combinatorial_degenerated_faces"]>0);
+			contents += add_condition_row("Geometrically degenerate",
+			data["num_geometric_degenerated_faces"]>0);
+			contents += add_condition_row("Duplicated faces",
+			data["num_duplicated_faces"]>0);
+			contents += add_condition_row("PWN", data["PWN"]==1);
+			contents += add_condition_row("Solid", data["solid"]==1);
+
+			contents += add_row("Total area", data["total_area"]);
+			contents += "</table></p>";
+			// $("#geom_panel").html(contents);
+			var geom_panel_content = "<div id=\"geom_panel\" class=\"right_panel\">"
+			+ contents
+			+ "</div>";
+			
+			dp2 = $(geom_panel_content)
+			modeldetail.append( dp2 );
+		});
+		
+		modal.style.display = "block";
+	}
+	
+	
+	
+	//---------------------------------------------
 	function add_result(file_id) {
-		$("#result_panel").append(
-			"<a href=\"" + get_detail_link(file_id) + "\">"
-			+ "<div class=\"result_item\"><p>" + "model " + file_id + "</p>"
-			+ "<img src=\"" + get_rendering(file_id) + "\"/>"
-			+ "</div></a>"
-		);
+		var piccontent =  			// "<a href=\"" + get_detail_link(file_id) + "\">"
+			"<div class=\"result_item\"><p>" + "model " + file_id + "</p>"
+			+ "<img id="+file_id+", src=\"" + get_rendering(file_id) + "\"/>"
+			+ "</div>";
+		var picdiv = $(piccontent)
+		var addele = $("#result_panel").append(picdiv);
+		
+		// console.log(picdiv);
+		// console.log($("#xxxx"+file_id));
+		picdiv.click( function() {
+			// show_model_detail(piccontent);
+			retrieve_details_dialog( file_id );
+			console.log( file_id );
+		});
 	}
 
 	function add_100_models(num_results) {
 		var contents = "<h3>Query  returns " + num_results + " results. "
 		+ "<div id=\"download_query_result\"> Download Script </div>"
 		+ "</h3>";
+		
 		$("#result_panel").html(contents);
 		for (var mi=0; mi<num_results; mi++){
 			var file_id = modelistid[mi];
