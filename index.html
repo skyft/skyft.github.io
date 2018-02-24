@@ -28,8 +28,8 @@
 
 /* Modal Content */
 .modal-content {
-    background-color: #000; /*#fefefe;*/
-	color: #aaaaaa;
+    background-color: #fefefe;
+	/*color: #aaaaaa;*/
     margin: auto;
     /*padding: 20px;*/
     border: 1px solid #888;
@@ -39,7 +39,7 @@
 
 /* The Close Button */
 .close {
-	z-index: 201; /* Sit on top */
+	z-index: 1000; /* Sit on top */
     color: #aaaaaa;
     float: right;
     font-size: 28px;
@@ -213,7 +213,10 @@
         + "</div>";
 		
 		dp0 = $(dialog_content);
+		dp0.css( "z-index", "200");
 		modeldetail.append( dp0 );
+		// dp0.get().style.cssText = 'z-index:200';
+		
 		
 		var baseurllink = "https://ten-thousand-models.appspot.com";///api/v1/model/100028
 		$.getJSON(baseurllink + get_api_uri() + "/model/" + file_id,
@@ -242,7 +245,10 @@
 			+ contents
 			+ "</div>";
 			dp1 = $(info_panel_content);
+			dp1.css( "z-index", "200");
 			modeldetail.append( dp1 );
+			// dp1.get().style.cssText = 'z-index:200';
+			
 
 			contents = "<p><table>";
 			//contents += add_header("Geometry info");
@@ -278,9 +284,11 @@
 			+ "</div>";
 			
 			dp2 = $(geom_panel_content)
+			dp2.css( "z-index", "200");
 			modeldetail.append( dp2 );
+			// dp2.get().style.cssText = 'z-index:200';
 			
-			run_viewer(  data["link"], 'myModal' );
+			run_viewer(  data["link"], 'model_detail' );
 		});
 		
 		modal.style.display = "block";
@@ -418,7 +426,7 @@
 				// world
 
 				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0xcccccc );
+				scene.background = new THREE.Color( 0x000 );
 				scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
 
 				var geometry = new THREE.CylinderGeometry( 0, 10, 30, 4, 1 );
@@ -482,7 +490,8 @@
 				container = document.getElementById(container_ele);
 				container.appendChild( renderer.domElement );
 				// renderer.domElement.style.position = "absolute";
-				renderer.domElement.style.cssText = 'position:fixed;top:0;left:0;z-index:200';
+				// renderer.domElement.style.cssText = 'position:fixed;top:0;left:0;z-index:200';
+				renderer.domElement.style.cssText = 'position:fixed;top:0;left:0;'
 
 
 				stats = new Stats();
